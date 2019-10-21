@@ -1,18 +1,12 @@
 var app = new Vue({
   el: '#app',
   data: {
-    items: [{
-      text: "make an app",
-      completed: false,
-    }, {
-      text: "declare victory",
-      completed: false,
-    }, {
-      text: "profit",
-      completed: false
-    }],
-    text: '',
+    items: [],
+    message: '',
     show: 'all',
+  },
+  created: function() {
+    this.getItems();
   },
   computed: {
     activeItems() {
@@ -33,12 +27,25 @@ var app = new Vue({
     },
   },
   methods: {
-    addItem() {
-      this.items.push({
-        text: this.text,
-        completed: false
-      });
-      this.text = '';
+    async getItems() {
+      try {
+        const response = await axios.get("/api/items");
+        this.items = response.data;
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async addItem() {
+      try {
+        const response = await axios.post("/api/items", {
+          text: this.text,
+          completed: false
+        });
+        this.text = "";
+        this.getItems();
+      } catch (error) {
+        console.log(error);
+      }
     },
     deleteItem(item) {
       var index = this.items.indexOf(item);
@@ -58,6 +65,17 @@ var app = new Vue({
       this.items = this.items.filter(item => {
         return !item.completed;
       });
+    },
+    async completeItem(item) {
+      try {
+        const response = axios.put("/api/items/" + item.id, {
+          text: item.text,
+          completed: !item.completed,
+        });
+        this.getItems();
+      } catch (error) {
+        console.log(error);
+      }
     },
   }
 });
