@@ -47,11 +47,6 @@ var app = new Vue({
         console.log(error);
       }
     },
-    deleteItem(item) {
-      var index = this.items.indexOf(item);
-      if (index > -1)
-        this.items.splice(index, 1);
-    },
     showAll() {
       this.show = 'all';
     },
@@ -62,8 +57,9 @@ var app = new Vue({
       this.show = 'completed';
     },
     deleteCompleted() {
-      this.items = this.items.filter(item => {
-        return !item.completed;
+      this.items.forEach(item => {
+        if (item.completed)
+          this.deleteItem(item);
       });
     },
     async completeItem(item) {
@@ -72,6 +68,14 @@ var app = new Vue({
           text: item.text,
           completed: !item.completed,
         });
+        this.getItems();
+      } catch (error) {
+        console.log(error);
+      }
+    },
+    async deleteItem(item) {
+      try {
+        const response = await axios.delete("/api/items/" + item.id);
         this.getItems();
       } catch (error) {
         console.log(error);
